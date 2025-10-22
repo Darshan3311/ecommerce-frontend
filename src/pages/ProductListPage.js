@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import { ShoppingCartIcon, HeartIcon, StarIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import useCartStore from '../store/useCartStore';
@@ -27,29 +27,30 @@ const ProductListPage = () => {
   }, [searchParams]);
 
   useEffect(() => {
+    let mounted = true;
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get('/categories');
+        const cats = response.data || [];
+        if (mounted) setCategories(cats);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
     fetchCategories();
+    return () => { mounted = false; };
   }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/categories');
-      setCategories(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
 
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (selectedCategory) params.append('category', selectedCategory);
-      
+      const params = {};
+      if (selectedCategory) params.category = selectedCategory;
       const searchQuery = searchParams.get('search');
-      if (searchQuery) params.append('search', searchQuery);
+      if (searchQuery) params.search = searchQuery;
 
-      const response = await axios.get(`http://localhost:5000/api/products?${params}`);
-      const productsData = response.data.data?.products || response.data.data || [];
+      const response = await api.get('/products', { params });
+      const productsData = response.data?.products || response.data || [];
       setProducts(productsData);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -57,7 +58,7 @@ const ProductListPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, searchParams]);
+  }, [selectedCategory, searchParams.toString()]);
 
   useEffect(() => {
     fetchProducts();

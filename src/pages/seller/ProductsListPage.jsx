@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import useAuthStore from '../../store/useAuthStore';
 import toast from 'react-hot-toast';
 import {
@@ -16,28 +16,28 @@ const ProductsListPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/products/seller/my-products', {
-        headers: {
-          Authorization: `Bearer ${token}`
+    let mounted = true;
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // Server authenticates via HTTP-only cookie; no Authorization header required
+        const response = await api.get('/products/seller/my-products');
+        if (response.data?.success) {
+          if (mounted) setProducts(response.data.data || []);
+        } else {
+          if (mounted) setProducts(response.data || []);
         }
-      });
-
-      if (response.data.success) {
-        setProducts(response.data.data || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        toast.error('Failed to load products');
+      } finally {
+        if (mounted) setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      toast.error('Failed to load products');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchProducts();
+    return () => { mounted = false; };
+  }, []);
 
   const handleDelete = async (productId) => {
     if (!window.confirm('Are you sure you want to permanently delete this product? This action cannot be undone.')) {
@@ -45,11 +45,7 @@ const ProductsListPage = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/products/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      await api.delete(`/products/${productId}`);
 
       toast.success('Product permanently deleted');
       fetchProducts(); // Refresh list
@@ -66,15 +62,7 @@ const ProductsListPage = () => {
     }
 
     try {
-      const response = await axios.patch(
-        `http://localhost:5000/api/products/${productId}/status`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const response = await api.patch(`/products/${productId}/status`, {});
 
       toast.success(response.data.data.message);
       fetchProducts(); // Refresh list

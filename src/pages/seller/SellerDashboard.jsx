@@ -10,7 +10,7 @@ import {
   PencilIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import api from '../../utils/api';
 import useAuthStore from '../../store/useAuthStore';
 import toast from 'react-hot-toast';
 
@@ -22,39 +22,30 @@ const SellerDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        // Fetch seller stats
+        const statsRes = await api.get('/sellers/stats');
+        if (mounted) setStats(statsRes.data?.data || statsRes.data);
+
+        // Fetch seller's products
+        const productsRes = await api.get('/products/seller/my-products');
+        console.log('Products response:', productsRes.data);
+        if (mounted) setProducts(productsRes.data?.data || productsRes.data || []);
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        toast.error('Failed to load dashboard data');
+        if (mounted) setLoading(false);
+      }
+    };
+
     fetchDashboardData();
+    return () => { mounted = false; };
   }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch seller stats
-      const statsRes = await axios.get('http://localhost:5000/api/sellers/stats', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setStats(statsRes.data.data);
-
-      // Fetch seller's products
-      const productsRes = await axios.get('http://localhost:5000/api/products/seller/my-products', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log('Products response:', productsRes.data);
-      setProducts(productsRes.data.data || []);
-
-      // TODO: Fetch seller's orders
-      // const ordersRes = await axios.get('http://localhost:5000/api/orders/seller', {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
-      // setOrders(ordersRes.data.data);
-
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      toast.error('Failed to load dashboard data');
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async (productId) => {
     if (!window.confirm('Are you sure you want to permanently delete this product? This action cannot be undone.')) {
@@ -62,9 +53,7 @@ const SellerDashboard = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/products/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/products/${productId}`);
 
       toast.success('Product permanently deleted');
       fetchDashboardData(); // Refresh data
@@ -81,14 +70,11 @@ const SellerDashboard = () => {
     }
 
     try {
-      const response = await axios.patch(
-        `http://localhost:5000/api/products/${productId}/status`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      toast.success(response.data.data.message);
-      fetchDashboardData(); // Refresh data
+      const response = await api.patch(`/products/${productId}/status`, {});
+      toast.success(response.data?.data?.message || response.data?.message || 'Updated');
+      // Refresh data
+      const refreshed = await api.get('/products/seller/my-products');
+      setProducts(refreshed.data?.data || refreshed.data || []);
     } catch (error) {
       console.error('Error toggling product status:', error);
       toast.error('Failed to update product status');

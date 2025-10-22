@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 import useCartStore from '../store/useCartStore';
@@ -18,23 +18,26 @@ const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
-    fetchProduct();
-  }, [id]);
+    let mounted = true;
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/products/${id}`);
+        // backend returns envelope { status, data }
+        const productData = response.data?.product || response.data;
+        console.log('Fetched product:', productData);
+        if (mounted) setProduct(productData);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        toast.error('Failed to load product');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
 
-  const fetchProduct = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`http://localhost:5000/api/products/${id}`);
-      const productData = response.data.data?.product || response.data.data;
-      console.log('Fetched product:', productData);
-      setProduct(productData);
-    } catch (error) {
-      console.error('Error fetching product:', error);
-      toast.error('Failed to load product');
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (id) fetchProduct();
+    return () => { mounted = false; };
+  }, [id]);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {

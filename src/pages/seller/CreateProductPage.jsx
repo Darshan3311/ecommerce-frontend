@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
+import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import useAuthStore from '../../store/useAuthStore';
@@ -23,9 +23,9 @@ const CreateProductPage = () => {
   const fetchCategories = async () => {
     try {
       setLoadingData(true);
-      const categoriesRes = await axios.get('http://localhost:5000/api/categories');
+      const categoriesRes = await api.get('/categories');
       console.log('Categories API Response:', categoriesRes.data);
-      const categoriesData = categoriesRes.data.data || [];
+      const categoriesData = categoriesRes.data || [];
       console.log('Categories Data:', categoriesData);
       setCategories(categoriesData);
     } catch (error) {
@@ -104,18 +104,11 @@ const CreateProductPage = () => {
       });
 
       console.log('Submitting product data...');
-      const response = await axios.post(
-        'http://localhost:5000/api/products',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
+      const response = await api.post('/products', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-      if (response.data.success) {
+      if (response.data?.success) {
         toast.success('Product created successfully!');
         navigate('/seller/products');
       }

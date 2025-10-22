@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { ShoppingCartIcon, HeartIcon, StarIcon, TruckIcon, ShieldCheckIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import useCartStore from '../store/useCartStore';
@@ -24,12 +24,12 @@ const HomePage = () => {
     try {
       setLoading(true);
       const [productsRes, categoriesRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/products?limit=8'),
-        axios.get('http://localhost:5000/api/categories')
+        api.get('/products', { params: { limit: 8 } }),
+        api.get('/categories')
       ]);
-      
-      setFeaturedProducts(productsRes.data.data?.products || productsRes.data.data || []);
-      setCategories(categoriesRes.data.data || []);
+
+      setFeaturedProducts(productsRes.data?.products || productsRes.data || []);
+      setCategories(categoriesRes.data || []);
     } catch (error) {
       console.error('Error fetching home data:', error);
     } finally {

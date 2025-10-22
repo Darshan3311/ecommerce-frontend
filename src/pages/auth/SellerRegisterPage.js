@@ -7,10 +7,9 @@ import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { 
   BuildingStorefrontIcon, 
-  EnvelopeIcon, 
-  PhoneIcon,
+  
   MapPinIcon,
-  DocumentTextIcon,
+  
   UserIcon
 } from '@heroicons/react/24/outline';
 
@@ -104,7 +103,7 @@ const SellerRegisterPage = () => {
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        const response = await api.post('/sellers/register', {
+        await api.post('/sellers/register', {
           ...values,
           businessAddress: {
             addressLine1: values.addressLine1,

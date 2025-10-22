@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { UserCircleIcon, CameraIcon } from '@heroicons/react/24/outline';
 import useAuthStore from '../store/useAuthStore';
-import axios from 'axios';
+import api from '../utils/api';
 
 const ProfilePage = () => {
-  const { user, token, setUser } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [formData, setFormData] = useState({
@@ -38,18 +38,9 @@ const ProfilePage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.put(
-        'http://localhost:5000/api/users/profile',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      if (response.data.success) {
-        setUser(response.data.data);
+      const response = await api.put('/users/profile', formData);
+      if (response.data?.success) {
+        setUser(response.data.data || response.data);
         toast.success('Profile updated successfully!');
       }
     } catch (error) {
@@ -82,19 +73,12 @@ const ProfilePage = () => {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await axios.post(
-        'http://localhost:5000/api/users/avatar',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
+      const response = await api.post('/users/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-      if (response.data.success) {
-        setUser(response.data.data);
+      if (response.data?.success) {
+        setUser(response.data.data || response.data);
         toast.success('Avatar uploaded successfully!');
       }
     } catch (error) {

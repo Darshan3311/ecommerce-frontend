@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import {
   UsersIcon,
@@ -27,62 +27,42 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
-    if (token) {
-      fetchPendingSellers();
-    }
-    // fetchStats(); // Uncomment when stats API is ready
-  }, [token]);
+    let mounted = true;
+    const fetchPendingSellers = async () => {
+      try {
+        setLoading(true);
+        const timestamp = new Date().getTime();
+        const response = await api.get('/sellers', { params: { status: 'pending', _t: timestamp } });
 
-  const fetchPendingSellers = async () => {
-    try {
-      setLoading(true);
-      console.log('Fetching pending sellers...');
-      console.log('Token:', token);
-      
-      // Add cache-busting query parameter
-      const timestamp = new Date().getTime();
-      const response = await axios.get(`http://localhost:5000/api/sellers?status=pending&_t=${timestamp}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
-
-      console.log('Full seller API response:', response.data);
-      console.log('Sellers data:', response.data.data);
-      console.log('Number of sellers:', response.data.data?.length);
-      
-      if (response.data.success) {
-        const sellers = response.data.data || [];
+        console.log('Full seller API response:', response.data);
+        const sellers = response.data?.data || response.data || [];
         console.log('Setting pending sellers:', sellers);
-        setPendingSellers(sellers);
-        setStats(prev => ({ ...prev, pendingSellers: sellers.length }));
+        if (mounted) {
+          setPendingSellers(sellers);
+          setStats(prev => ({ ...prev, pendingSellers: sellers.length }));
+        }
+      } catch (error) {
+        console.error('Error fetching pending sellers:', error);
+        console.error('Error response:', error.response?.data);
+        toast.error(error.response?.data?.message || 'Failed to fetch pending sellers');
+      } finally {
+        if (mounted) setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching pending sellers:', error);
-      console.error('Error response:', error.response?.data);
-      toast.error(error.response?.data?.message || 'Failed to fetch pending sellers');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchPendingSellers();
+    return () => { mounted = false; };
+  }, []);
 
   const handleApproveSeller = async (sellerId) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/sellers/${sellerId}/approve`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      if (response.data.success) {
+      const response = await api.put(`/sellers/${sellerId}/approve`, {});
+      if (response.data?.success) {
         toast.success('Seller approved successfully!');
-        fetchPendingSellers(); // Refresh the list
+        // re-fetch
+        const timestamp = new Date().getTime();
+        const refreshed = await api.get('/sellers', { params: { status: 'pending', _t: timestamp } });
+        setPendingSellers(refreshed.data?.data || refreshed.data || []);
       }
     } catch (error) {
       console.error('Error approving seller:', error);
@@ -95,19 +75,12 @@ const AdminDashboard = () => {
     if (!reason) return;
 
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/sellers/${sellerId}/reject`,
-        { reason },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      if (response.data.success) {
+      const response = await api.put(`/sellers/${sellerId}/reject`, { reason });
+      if (response.data?.success) {
         toast.success('Seller rejected');
-        fetchPendingSellers(); // Refresh the list
+        const timestamp = new Date().getTime();
+        const refreshed = await api.get('/sellers', { params: { status: 'pending', _t: timestamp } });
+        setPendingSellers(refreshed.data?.data || refreshed.data || []);
       }
     } catch (error) {
       console.error('Error rejecting seller:', error);
