@@ -38,12 +38,12 @@ const OrdersPage = () => {
     <div className="p-8">
       <h2 className="text-2xl font-bold mb-4">My Orders</h2>
       <div className="space-y-4">
-        {orders.map(order => (
+        {Array.isArray(orders) ? orders.map(order => (
           <div key={order._id} className="bg-white p-4 rounded shadow">
             <div className="flex justify-between items-center">
               <div>
                 <div className="text-sm text-gray-500">Order: {order.orderNumber}</div>
-                <div className="text-lg font-semibold">${order.pricing.total.toFixed(2)}</div>
+                <div className="text-lg font-semibold">${(order.pricing?.total ?? 0).toFixed(2)}</div>
                 <div className="text-sm text-gray-600">Status: {order.orderStatus}</div>
               </div>
               <div>
@@ -51,7 +51,7 @@ const OrdersPage = () => {
               </div>
             </div>
           </div>
-        ))}
+        )) : <div>No orders found</div>}
       </div>
     </div>
   );

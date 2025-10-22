@@ -10,7 +10,13 @@ class OrderService {
   // Get user orders
   async getUserOrders(params = {}) {
     const res = await api.get('/orders', { params });
-    return res?.data || res;
+    // Normalize possible response shapes:
+    // - { status, data: { orders: [...] } }
+    // - { orders: [...] }
+    // - [...] (array)
+    const fromData = res?.data;
+    const orders = fromData?.data?.orders || fromData?.orders || fromData;
+    return orders;
   }
 
   // Get order by ID
