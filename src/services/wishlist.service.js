@@ -3,29 +3,32 @@ import api from '../utils/api';
 const wishlistService = {
   // Get wishlist
   getWishlist: async () => {
-    // api interceptor already returns response.data (the JSON body)
-    // so return it directly to preserve the { status, data } wrapper
-    return await api.get('/wishlist');
+    const res = await api.get('/wishlist');
+    return res.data; // { status, data }
   },
 
   // Add to wishlist
   addToWishlist: async (productId) => {
-    return await api.post('/wishlist', { productId });
+    const res = await api.post('/wishlist', { productId });
+    return res.data;
   },
 
   // Remove from wishlist
   removeFromWishlist: async (productId) => {
-    return await api.delete(`/wishlist/${productId}`);
+    const res = await api.delete(`/wishlist/${productId}`);
+    return res.data;
   },
 
   // Clear wishlist
   clearWishlist: async () => {
-    return await api.delete('/wishlist');
+    const res = await api.delete('/wishlist');
+    return res.data;
   },
 
   // Move to cart
   moveToCart: async (productId) => {
-    return await api.post(`/wishlist/${productId}/move-to-cart`);
+    const res = await api.post(`/wishlist/${productId}/move-to-cart`);
+    return res.data;
   }
 };
 

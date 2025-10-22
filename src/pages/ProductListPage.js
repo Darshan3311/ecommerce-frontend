@@ -119,6 +119,26 @@ const ProductListPage = () => {
     return null;
   };
 
+  // Helper to compute stock: prefer product.stock, otherwise sum variant stockQuantity
+  const displayStock = (product) => {
+    if (typeof product.stock === 'number' && product.stock > 0) return product.stock;
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      const total = product.variants.reduce((sum, v) => sum + (v.stockQuantity || 0), 0);
+      return total;
+    }
+    return product.stock || 0;
+  };
+
+  // Helper to compute display price: prefer product.price, otherwise min variant price
+  const displayPrice = (product) => {
+    if (typeof product.price === 'number' && product.price > 0) return product.price;
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      const prices = product.variants.map(v => v.price || 0).filter(p => p > 0);
+      if (prices.length > 0) return Math.min(...prices);
+    }
+    return product.price || 0;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -220,7 +240,7 @@ const ProductListPage = () => {
                   <Link to={`/products/${product._id}`}>
                     {/* Product Image */}
                     <div className="aspect-square overflow-hidden bg-gray-100 relative">
-                      {product.images && product.images.length > 0 ? (
+                      {product.images && product.images.length > 0 && safeImageSrc(product.images[0]) ? (
                         <img
                           src={safeImageSrc(product.images[0])}
                           alt={product.name}
@@ -231,7 +251,7 @@ const ProductListPage = () => {
                           No Image
                         </div>
                       )}
-                      {product.stock === 0 && (
+                      {displayStock(product) === 0 && (
                         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                           <span className="text-white font-bold text-lg">Out of Stock</span>
                         </div>
@@ -266,7 +286,7 @@ const ProductListPage = () => {
                       {/* Price */}
                       <div className="flex items-baseline gap-2 mb-3">
                         <span className="text-2xl font-bold text-gray-900">
-                          ${product.price ? product.price.toFixed(2) : '0.00'}
+                          ${displayPrice(product).toFixed(2)}
                         </span>
                         {product.compareAtPrice && product.compareAtPrice > product.price && (
                           <>
@@ -282,9 +302,9 @@ const ProductListPage = () => {
 
                       {/* Stock Status */}
                       <div className="text-sm mb-3">
-                        {product.stock > 0 ? (
+                        {displayStock(product) > 0 ? (
                           <span className="text-green-600 font-medium">
-                            ✓ In Stock ({product.stock} available)
+                            ✓ In Stock ({displayStock(product)} available)
                           </span>
                         ) : (
                           <span className="text-red-600 font-medium">✗ Out of Stock</span>
@@ -297,7 +317,7 @@ const ProductListPage = () => {
                   <div className="px-4 pb-4">
                     <button
                       onClick={(e) => handleAddToCart(e, product)}
-                      disabled={product.stock === 0}
+                        disabled={displayStock(product) === 0}
                       className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
                         product.stock === 0
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -305,7 +325,7 @@ const ProductListPage = () => {
                       }`}
                     >
                       <ShoppingCartIcon className="w-5 h-5" />
-                      {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                      {displayStock(product) === 0 ? 'Out of Stock' : 'Add to Cart'}
                     </button>
                   </div>
                 </div>
