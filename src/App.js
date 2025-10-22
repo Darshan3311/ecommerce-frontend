@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import useAuthStore from './store/useAuthStore';
+import { useNavigate } from 'react-router-dom';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -31,9 +32,21 @@ function App() {
   // Initialize auth session on app mount so cookie-based sessions are
   // reconciled before protected routes decide to redirect.
   const init = useAuthStore((s) => s.init);
+  const navigate = useNavigate();
+
   React.useEffect(() => {
     init();
-  }, [init]);
+
+    // Listen for unauthorized events emitted by the API layer
+    const onUnauth = () => {
+      // Use react-router navigation to avoid full page reloads which can
+      // cause 404s when hosting an SPA on platforms like Render.
+      navigate('/login', { replace: true });
+    };
+
+    window.addEventListener('app:unauthorized', onUnauth);
+    return () => window.removeEventListener('app:unauthorized', onUnauth);
+  }, [init, navigate]);
   return (
     <div className="App">
       <Routes>

@@ -40,9 +40,11 @@ api.interceptors.response.use(
 
     // Handle specific error codes
     if (error.response?.status === 401) {
-      // Unauthorized - clear stored user and redirect to login
+      // Unauthorized - clear stored user and notify the app to navigate to login
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Dispatch a custom event so the React app can navigate using react-router
+      // Notify the app to navigate via react-router (avoid full page reload)
+      window.dispatchEvent(new CustomEvent('app:unauthorized'));
       toast.error('Session expired. Please login again.');
     } else if (error.response?.status === 403) {
       toast.error('You do not have permission to perform this action');
