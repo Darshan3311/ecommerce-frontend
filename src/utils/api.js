@@ -8,16 +8,14 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Allow sending/receiving cookies for cross-site auth when frontend and backend are on different origins
+  withCredentials: true,
 });
 
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Get token from localStorage
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // Auth is handled via HTTP-only cookie set by backend. Do not attach tokens from localStorage.
     return config;
   },
   (error) => {
@@ -28,7 +26,8 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    return response.data;
+    // Return full axios response so calling services can access `response.data` or other fields as needed.
+    return response;
   },
   (error) => {
     const message = error.response?.data?.message || error.message || 'Something went wrong';
@@ -41,8 +40,7 @@ api.interceptors.response.use(
 
     // Handle specific error codes
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
-      localStorage.removeItem('token');
+      // Unauthorized - clear stored user and redirect to login
       localStorage.removeItem('user');
       window.location.href = '/login';
       toast.error('Session expired. Please login again.');

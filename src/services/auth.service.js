@@ -10,8 +10,8 @@ class AuthService {
   // Login
   async login(credentials) {
     const response = await api.post('/auth/login', credentials);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
+    // Server sets HTTP-only auth cookie. Persist only the user profile locally.
+    if (response.data && response.data.user) {
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
     return response.data;
@@ -19,7 +19,12 @@ class AuthService {
 
   // Logout
   logout() {
-    localStorage.removeItem('token');
+    // Call backend to clear auth cookie and then purge local state
+    try {
+      api.post('/auth/logout');
+    } catch (e) {
+      // ignore network error; still clear local state
+    }
     localStorage.removeItem('user');
     localStorage.removeItem('cart');
   }
@@ -60,14 +65,9 @@ class AuthService {
     return userStr ? JSON.parse(userStr) : null;
   }
 
-  // Get stored token
-  getStoredToken() {
-    return localStorage.getItem('token');
-  }
-
-  // Check if logged in
+  // Check if logged in (based on stored user profile)
   isLoggedIn() {
-    return !!this.getStoredToken();
+    return !!this.getStoredUser();
   }
 }
 

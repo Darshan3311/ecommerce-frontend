@@ -3,8 +3,8 @@ import AuthService from '../services/auth.service';
 
 const useAuthStore = create((set, get) => ({
   user: AuthService.getStoredUser(),
-  token: AuthService.getStoredToken(),
-  isAuthenticated: AuthService.isLoggedIn(),
+  token: null,
+  isAuthenticated: !!AuthService.getStoredUser(),
   isLoading: false,
   error: null,
 
