@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import useAuthStore from './store/useAuthStore';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -27,6 +28,12 @@ import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 function App() {
+  // Initialize auth session on app mount so cookie-based sessions are
+  // reconciled before protected routes decide to redirect.
+  const init = useAuthStore((s) => s.init);
+  React.useEffect(() => {
+    init();
+  }, [init]);
   return (
     <div className="App">
       <Routes>
