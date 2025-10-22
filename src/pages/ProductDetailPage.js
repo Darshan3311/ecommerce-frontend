@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../utils/api';
+import api from '../utils/api';
 import { toast } from 'react-hot-toast';
 import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 import useCartStore from '../store/useCartStore';

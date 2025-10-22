@@ -10,7 +10,7 @@ import {
   PencilIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
-import api from '../../utils/api';
+import api from '../utils/api';
 import useAuthStore from '../../store/useAuthStore';
 import toast from 'react-hot-toast';
 
