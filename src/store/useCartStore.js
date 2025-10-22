@@ -100,13 +100,48 @@ const useCartStore = create((set, get) => ({
 
     set({ isLoading: true });
     try {
-      const cart = await CartService.addToCart(product._id, quantity);
-      console.log('Added to cart response:', cart);
-      get().setCart(cart);
+      // Optimistic UI update: add product locally first
+      const prevItems = get().items || [];
+      const existingIndex = prevItems.findIndex(it => it.product._id === product._id);
+      let optimisticItems = [...prevItems];
+      if (existingIndex > -1) {
+        optimisticItems[existingIndex] = {
+          ...optimisticItems[existingIndex],
+          quantity: optimisticItems[existingIndex].quantity + quantity
+        };
+      } else {
+        optimisticItems.push({
+          _id: `${product._id}-${Date.now()}`,
+          product,
+          price: product.price || 0,
+          quantity
+        });
+      }
+
+      const subtotal = optimisticItems.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+      const tax = subtotal * 0.08;
+      const total = subtotal + tax;
+      set({ items: optimisticItems, subtotal, tax, total });
+
+      // Call API to add; then refresh authoritative cart from server
+      await CartService.addToCart(product._id, quantity);
+      const serverCart = await CartService.getCart();
+      if (serverCart && serverCart.items) {
+        console.log('Added to cart response (refreshed):', serverCart);
+        get().setCart(serverCart);
+      } else {
+        console.warn('Server did not return authoritative cart after add; keeping optimistic UI');
+      }
       set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false });
       console.error('Add to cart error in store:', error);
+      // On error, rollback by refetching authoritative cart
+      try {
+        await get().fetchCart();
+      } catch (e) {
+        console.error('Rollback fetch failed:', e);
+      }
       throw error;
     }
   },
@@ -144,14 +179,11 @@ const useCartStore = create((set, get) => ({
       set({ items: newItems, subtotal, tax, total });
 
       // call server
-      const cart = await CartService.updateCartItem(productId, quantity);
-      console.log('updateCartItem response:', cart);
-      if (cart && (cart.items || cart.length !== undefined)) {
-        get().setCart(cart);
-      } else {
-        // If server returned unexpected shape, refetch
-        await get().fetchCart();
-      }
+      await CartService.updateCartItem(productId, quantity);
+      // Refresh authoritative cart
+      const cart = await CartService.getCart();
+      console.log('updateCartItem response (refreshed):', cart);
+      get().setCart(cart);
     } catch (error) {
       // rollback
       get().setCart({ items: prevCart });
@@ -180,13 +212,11 @@ const useCartStore = create((set, get) => ({
       set({ items: newItems, subtotal, tax, total });
 
       // call server
-      const cart = await CartService.removeFromCart(productId);
-      console.log('removeFromCart response:', cart);
-      if (cart && (cart.items || cart.length !== undefined)) {
-        get().setCart(cart);
-      } else {
-        await get().fetchCart();
-      }
+      await CartService.removeFromCart(productId);
+      // Refresh authoritative cart
+      const cart = await CartService.getCart();
+      console.log('removeFromCart response (refreshed):', cart);
+      get().setCart(cart);
     } catch (error) {
       // rollback
       get().setCart({ items: prevCart });
