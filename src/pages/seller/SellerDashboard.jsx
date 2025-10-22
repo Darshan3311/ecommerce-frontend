@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShoppingBagIcon,
@@ -21,30 +21,32 @@ const SellerDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const mountedRef = useRef(true);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      // Fetch seller stats
+      const statsRes = await api.get('/sellers/stats');
+      if (mountedRef.current) setStats(statsRes.data?.data || statsRes.data);
+
+      // Fetch seller's products
+      const productsRes = await api.get('/products/seller/my-products');
+      console.log('Products response:', productsRes.data);
+      if (mountedRef.current) setProducts(productsRes.data?.data || productsRes.data || []);
+
+      if (mountedRef.current) setLoading(false);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast.error('Failed to load dashboard data');
+      if (mountedRef.current) setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let mounted = true;
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        // Fetch seller stats
-        const statsRes = await api.get('/sellers/stats');
-        if (mounted) setStats(statsRes.data?.data || statsRes.data);
-
-        // Fetch seller's products
-        const productsRes = await api.get('/products/seller/my-products');
-        console.log('Products response:', productsRes.data);
-        if (mounted) setProducts(productsRes.data?.data || productsRes.data || []);
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        toast.error('Failed to load dashboard data');
-        if (mounted) setLoading(false);
-      }
-    };
-
+    mountedRef.current = true;
     fetchDashboardData();
-    return () => { mounted = false; };
+    return () => { mountedRef.current = false; };
   }, []);
 
   const handleDelete = async (productId) => {
@@ -53,10 +55,10 @@ const SellerDashboard = () => {
     }
 
     try {
-      await api.delete(`/products/${productId}`);
+  await api.delete(`/products/${productId}`);
 
-      toast.success('Product permanently deleted');
-      fetchDashboardData(); // Refresh data
+  toast.success('Product permanently deleted');
+  fetchDashboardData(); // Refresh data
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error('Failed to delete product');

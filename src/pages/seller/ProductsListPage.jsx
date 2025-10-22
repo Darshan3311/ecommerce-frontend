@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import useAuthStore from '../../store/useAuthStore';
@@ -15,28 +15,30 @@ const ProductsListPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        // Server authenticates via HTTP-only cookie; no Authorization header required
-        const response = await api.get('/products/seller/my-products');
-        if (response.data?.success) {
-          if (mounted) setProducts(response.data.data || []);
-        } else {
-          if (mounted) setProducts(response.data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        toast.error('Failed to load products');
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
+  const mountedRef = useRef(true);
 
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      // Server authenticates via HTTP-only cookie; no Authorization header required
+      const response = await api.get('/products/seller/my-products');
+      if (response.data?.success) {
+        if (mountedRef.current) setProducts(response.data.data || []);
+      } else {
+        if (mountedRef.current) setProducts(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Failed to load products');
+    } finally {
+      if (mountedRef.current) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    mountedRef.current = true;
     fetchProducts();
-    return () => { mounted = false; };
+    return () => { mountedRef.current = false; };
   }, []);
 
   const handleDelete = async (productId) => {
@@ -45,10 +47,10 @@ const ProductsListPage = () => {
     }
 
     try {
-      await api.delete(`/products/${productId}`);
+  await api.delete(`/products/${productId}`);
 
-      toast.success('Product permanently deleted');
-      fetchProducts(); // Refresh list
+  toast.success('Product permanently deleted');
+  fetchProducts(); // Refresh list
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error('Failed to delete product');
