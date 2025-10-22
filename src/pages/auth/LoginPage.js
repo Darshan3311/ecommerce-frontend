@@ -47,7 +47,12 @@ const LoginPage = () => {
       setIsLoading(true);
       try {
         await login(values);
-        await syncCart();
+        // Try to sync cart, but don't block login/navigation if it fails (e.g., 401s)
+        try {
+          await syncCart();
+        } catch (syncErr) {
+          console.warn('Cart sync failed after login:', syncErr);
+        }
         toast.success('Login successful!');
         // If a target path was provided (redirect after login), honor it.
         if (from) return navigate(from, { replace: true });

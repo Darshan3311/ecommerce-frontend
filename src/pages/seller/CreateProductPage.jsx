@@ -25,7 +25,8 @@ const CreateProductPage = () => {
       setLoadingData(true);
       const categoriesRes = await api.get('/categories');
       console.log('Categories API Response:', categoriesRes.data);
-      const categoriesData = categoriesRes.data || [];
+      // Backend returns envelope { status, data: [...] }
+      const categoriesData = categoriesRes.data?.data || categoriesRes.data || [];
       console.log('Categories Data:', categoriesData);
       setCategories(categoriesData);
     } catch (error) {

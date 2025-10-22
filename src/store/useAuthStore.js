@@ -66,6 +66,18 @@ const useAuthStore = create((set, get) => ({
   init: async () => {
     set({ isLoading: true, error: null });
     try {
+      // If a token was stored as a fallback (dev scenarios), ensure axios has it set
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          // import api lazily to avoid circular deps at module load time
+          const api = require('../utils/api').default;
+          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          set({ token });
+        }
+      } catch (e) {
+        // ignore
+      }
       const user = await AuthService.getCurrentUser();
       if (user) {
         localStorage.setItem('user', JSON.stringify(user));

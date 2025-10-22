@@ -28,6 +28,28 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     let mounted = true;
+    const fetchStats = async () => {
+      try {
+        // Users: /api/users returns { success, data: users, total }
+        const usersRes = await api.get('/users', { params: { page: 1, limit: 1 } });
+        const totalUsers = usersRes.data?.total || 0;
+
+        // Products: /api/products returns { status, data: result } where result may include total
+        const productsRes = await api.get('/products', { params: { page: 1, limit: 1 } });
+        const totalProducts = productsRes.data?.data?.total || productsRes.data?.total || 0;
+
+        // Orders: /api/orders should return { success, data: orders, total }
+        const ordersRes = await api.get('/orders', { params: { page: 1, limit: 1 } });
+        const totalOrders = ordersRes.data?.total || 0;
+
+        if (mounted) {
+          setStats(prev => ({ ...prev, totalUsers, totalProducts, totalOrders }));
+        }
+      } catch (err) {
+        console.error('Error fetching admin stats:', err);
+      }
+    };
+
     const fetchPendingSellers = async () => {
       try {
         setLoading(true);
@@ -50,6 +72,7 @@ const AdminDashboard = () => {
       }
     };
 
+    fetchStats();
     fetchPendingSellers();
     return () => { mounted = false; };
   }, []);
