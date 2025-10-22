@@ -115,6 +115,14 @@ const CartPage = () => {
               const product = item.product;
               const isUpdating = updating === product._id;
 
+                const safeImageSrc = (img) => {
+                  if (!img) return null;
+                  if (typeof img === 'string') return img;
+                  if (typeof img === 'object' && img.url) return img.url;
+                  if (typeof img === 'object' && (img.src || img.path)) return img.src || img.path;
+                  return null;
+                };
+
               return (
                 <div
                   key={product._id}
@@ -122,9 +130,9 @@ const CartPage = () => {
                 >
                   {/* Product Image */}
                   <div className="flex-shrink-0 w-32 h-32 bg-gray-100 rounded-lg overflow-hidden">
-                    {product.images && product.images[0]?.url ? (
+                    {product.images && product.images[0] && safeImageSrc(product.images[0]) ? (
                       <img
-                        src={product.images[0].url}
+                        src={safeImageSrc(product.images[0])}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />

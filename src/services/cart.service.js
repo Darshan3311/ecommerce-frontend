@@ -5,37 +5,37 @@ class CartService {
   async getCart() {
     // api returns the parsed body { status, data }
     const res = await api.get('/cart');
-    return res?.data?.cart || res?.cart || res?.data;
+    return res?.data?.data?.cart || res?.data?.cart || res?.cart || res?.data;
   }
 
   // Add to cart
   async addToCart(productId, quantity = 1) {
     const res = await api.post('/cart/add', { productId, quantity });
-    return res?.data?.cart || res?.cart || res?.data;
+    return res?.data?.data?.cart || res?.data?.cart || res?.cart || res?.data;
   }
 
   // Update cart item
   async updateCartItem(productId, quantity) {
     const res = await api.put(`/cart/${productId}`, { quantity });
-    return res?.data?.cart || res?.cart || res?.data;
+    return res?.data?.data?.cart || res?.data?.cart || res?.cart || res?.data;
   }
 
   // Remove from cart
   async removeFromCart(productId) {
     const res = await api.delete(`/cart/${productId}`);
-    return res?.data?.cart || res?.cart || res?.data;
+    return res?.data?.data?.cart || res?.data?.cart || res?.cart || res?.data;
   }
 
   // Clear cart
   async clearCart() {
     const res = await api.delete('/cart');
-    return res?.data?.cart || res?.cart || res?.data;
+    return res?.data?.data?.cart || res?.data?.cart || res?.cart || res?.data;
   }
 
   // Sync cart
   async syncCart(items) {
     const res = await api.post('/cart/sync', { items });
-    return res?.data?.cart || res?.cart || res?.data;
+    return res?.data?.data?.cart || res?.data?.cart || res?.cart || res?.data;
   }
 
   // Local cart management (for non-logged-in users)
