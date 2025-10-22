@@ -38,7 +38,12 @@ function App() {
     init();
 
     // Listen for unauthorized events emitted by the API layer
+    let unauthHandled = false;
     const onUnauth = () => {
+      if (unauthHandled) return;
+      unauthHandled = true;
+      // Clear session toast flag so a future login attempt can show it again
+      window.dispatchEvent(new CustomEvent('app:clearSessionToast'));
       // Use react-router navigation to avoid full page reloads which can
       // cause 404s when hosting an SPA on platforms like Render.
       navigate('/login', { replace: true });

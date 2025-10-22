@@ -39,13 +39,19 @@ api.interceptors.response.use(
     }
 
     // Handle specific error codes
+    // Deduplicate session expired toasts so users don't see repeated messages
+    if (!window.__sessionExpiredToastShown) window.__sessionExpiredToastShown = false;
+
     if (error.response?.status === 401) {
       // Unauthorized - clear stored user and notify the app to navigate to login
       localStorage.removeItem('user');
       // Dispatch a custom event so the React app can navigate using react-router
-      // Notify the app to navigate via react-router (avoid full page reload)
       window.dispatchEvent(new CustomEvent('app:unauthorized'));
-      toast.error('Session expired. Please login again.');
+
+      if (!window.__sessionExpiredToastShown) {
+        window.__sessionExpiredToastShown = true;
+        toast.error('Session expired. Please login again.');
+      }
     } else if (error.response?.status === 403) {
       toast.error('You do not have permission to perform this action');
     } else if (error.response?.status === 404) {
@@ -59,5 +65,10 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Allow the app to clear the session-expired toast flag when it navigates to login
+window.addEventListener('app:clearSessionToast', () => {
+  window.__sessionExpiredToastShown = false;
+});
 
 export default api;
