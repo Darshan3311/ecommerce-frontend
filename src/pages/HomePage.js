@@ -28,8 +28,22 @@ const HomePage = () => {
         api.get('/categories')
       ]);
 
-      setFeaturedProducts(productsRes.data?.products || productsRes.data || []);
-      setCategories(categoriesRes.data || []);
+      // Normalize featured products response - API may return different shapes
+      const featuredFromRes =
+        productsRes.data?.data?.products ||
+        productsRes.data?.data ||
+        productsRes.data?.products ||
+        productsRes.data ||
+        [];
+
+      const categoriesFromRes =
+        categoriesRes.data?.data ||
+        categoriesRes.data ||
+        [];
+
+      // Ensure we always set arrays
+      setFeaturedProducts(Array.isArray(featuredFromRes) ? featuredFromRes : []);
+      setCategories(Array.isArray(categoriesFromRes) ? categoriesFromRes : []);
     } catch (error) {
       console.error('Error fetching home data:', error);
     } finally {
