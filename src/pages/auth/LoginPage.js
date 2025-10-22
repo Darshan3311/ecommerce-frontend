@@ -10,18 +10,25 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated } = useAuthStore();
+  const { login, isAuthenticated, user } = useAuthStore();
   const { syncCart } = useCartStore();
 
   // Get the page they were trying to access, or default to dashboard
-  const from = location.state?.from || '/dashboard';
+  const from = location.state?.from || null;
 
   // Redirect if already logged in
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard', { replace: true });
+      // If there's no explicit 'from' location, route by role
+      const role = (user?.roleName || user?.role?.name || '').toLowerCase();
+      if (!from) {
+        if (role === 'admin') return navigate('/admin/dashboard', { replace: true });
+        if (role === 'seller') return navigate('/seller/dashboard', { replace: true });
+        return navigate('/dashboard', { replace: true });
+      }
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, from, user]);
 
   const formik = useFormik({
     initialValues: {
@@ -42,7 +49,15 @@ const LoginPage = () => {
         await login(values);
         await syncCart();
         toast.success('Login successful!');
-        navigate(from, { replace: true });
+        // If a target path was provided (redirect after login), honor it.
+        if (from) return navigate(from, { replace: true });
+
+        // Otherwise, redirect based on role
+        const stored = JSON.parse(localStorage.getItem('user') || 'null');
+        const roleName = (stored?.roleName || stored?.role?.name || '').toLowerCase();
+        if (roleName === 'admin') return navigate('/admin/dashboard', { replace: true });
+        if (roleName === 'seller') return navigate('/seller/dashboard', { replace: true });
+        navigate('/dashboard', { replace: true });
       } catch (error) {
         toast.error(error.response?.data?.message || 'Login failed');
       } finally {

@@ -48,31 +48,46 @@ function App() {
           <Route path="verify-email" element={<VerifyEmailPage />} />
           
           {/* Protected Routes */}
-          <Route path="dashboard" element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          } />
-          <Route path="admin/dashboard" element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="seller/dashboard" element={
-            <ProtectedRoute>
-              <SellerDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="seller/products" element={
-            <ProtectedRoute>
-              <ProductsListPage />
-            </ProtectedRoute>
-          } />
-          <Route path="seller/products/new" element={
-            <ProtectedRoute>
-              <CreateProductPage />
-            </ProtectedRoute>
-          } />
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="seller/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["seller"]}>
+                <SellerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="seller/products"
+            element={
+              <ProtectedRoute allowedRoles={["seller"]}>
+                <ProductsListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="seller/products/new"
+            element={
+              <ProtectedRoute allowedRoles={["seller"]}>
+                <CreateProductPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="cart" element={
             <ProtectedRoute>
               <CartPage />
