@@ -31,7 +31,8 @@ const ProductListPage = () => {
     const fetchCategories = async () => {
       try {
         const response = await api.get('/categories');
-        const cats = response.data || [];
+        const catsFromRes = response.data?.data || response.data || [];
+        const cats = Array.isArray(catsFromRes) ? catsFromRes : [];
         if (mounted) setCategories(cats);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -50,7 +51,14 @@ const ProductListPage = () => {
       if (searchQuery) params.search = searchQuery;
 
       const response = await api.get('/products', { params });
-      const productsData = response.data?.products || response.data || [];
+      const productsFromRes =
+        response.data?.data?.products ||
+        response.data?.data ||
+        response.data?.products ||
+        response.data ||
+        [];
+
+      const productsData = Array.isArray(productsFromRes) ? productsFromRes : [];
       setProducts(productsData);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -98,6 +106,18 @@ const ProductListPage = () => {
   }
 
   const searchQuery = searchParams.get('search');
+
+  // Helper to compute a safe image src from possible shapes
+  const safeImageSrc = (img) => {
+    if (!img) return null;
+    // If it's a string, use it directly
+    if (typeof img === 'string') return img;
+    // If it's an object with url property
+    if (typeof img === 'object' && img.url) return img.url;
+    // If it's an object with src or path
+    if (typeof img === 'object' && (img.src || img.path)) return img.src || img.path;
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -202,7 +222,7 @@ const ProductListPage = () => {
                     <div className="aspect-square overflow-hidden bg-gray-100 relative">
                       {product.images && product.images.length > 0 ? (
                         <img
-                          src={product.images[0].url || product.images[0]}
+                          src={safeImageSrc(product.images[0])}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
