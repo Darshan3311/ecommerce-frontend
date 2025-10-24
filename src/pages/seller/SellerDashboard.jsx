@@ -35,7 +35,20 @@ const SellerDashboard = () => {
       console.log('Products response:', productsRes.data);
       if (mountedRef.current) setProducts(productsRes.data?.data || productsRes.data || []);
 
-      if (mountedRef.current) setLoading(false);
+      // Fetch seller profile to obtain seller id, then fetch recent orders for this seller
+      try {
+        const profileRes = await api.get('/sellers/profile');
+        const seller = profileRes.data?.data || profileRes.data;
+        const sellerId = seller?._id || seller?.id || (seller && seller.user && seller.user._id);
+        if (sellerId) {
+          const ordersRes = await api.get(`/orders/seller/${sellerId}`);
+          if (mountedRef.current) setOrders(ordersRes.data?.data?.orders || ordersRes.data?.orders || []);
+        }
+      } catch (ordersErr) {
+        console.warn('Failed to load seller orders:', ordersErr);
+      }
+
+  if (mountedRef.current) setLoading(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast.error('Failed to load dashboard data');
@@ -331,14 +344,14 @@ const SellerDashboard = () => {
                       #{order.orderNumber}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.customer?.name}
+                      {order.user ? `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() : '—'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${order.totalAmount}
+                      ${order.pricing?.total?.toFixed ? order.pricing.total.toFixed(2) : (order.pricing?.total || '0.00')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        {order.status}
+                        {order.orderStatus}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

@@ -19,6 +19,14 @@ class OrderService {
     return orders;
   }
 
+  // Get orders for a specific seller
+  async getSellerOrders(sellerId, params = {}) {
+    const res = await api.get(`/orders/seller/${sellerId}`, { params });
+    const fromData = res?.data;
+    const orders = fromData?.data?.orders || fromData?.orders || fromData;
+    return orders;
+  }
+
   // Get order by ID
   async getOrderById(id) {
     const res = await api.get(`/orders/${id}`);

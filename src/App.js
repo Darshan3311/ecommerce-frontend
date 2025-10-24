@@ -19,6 +19,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import SellerDashboard from './pages/seller/SellerDashboard';
 import CreateProductPage from './pages/seller/CreateProductPage';
 import ProductsListPage from './pages/seller/ProductsListPage';
+import SellerOrdersPage from './pages/seller/SellerOrdersPage';
 import ProfilePage from './pages/ProfilePage';
 import OrdersPage from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
@@ -95,6 +96,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["seller"]}>
                 <ProductsListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="seller/orders"
+            element={
+              <ProtectedRoute allowedRoles={["seller"]}>
+                <SellerOrdersPage />
               </ProtectedRoute>
             }
           />
