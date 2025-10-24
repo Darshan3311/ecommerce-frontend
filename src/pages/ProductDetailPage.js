@@ -24,7 +24,8 @@ const ProductDetailPage = () => {
         setLoading(true);
         const response = await api.get(`/products/${id}`);
         // backend returns envelope { status, data }
-        const productData = response.data?.product || response.data;
+  // Backend returns envelope: { status, data: { product } }
+  const productData = response?.data?.data?.product || response?.data?.data || response?.data;
         console.log('Fetched product:', productData);
         if (mounted) setProduct(productData);
       } catch (error) {
