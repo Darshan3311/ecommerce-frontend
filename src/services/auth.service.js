@@ -36,7 +36,13 @@ class AuthService {
   // Logout
   logout() {
     // Call backend to clear auth cookie and then purge local state
+    // Add a debug trace in development so we can see what triggered logout
     try {
+      if (process.env.NODE_ENV === 'development') {
+        console.groupCollapsed('[AuthService.logout] logout called');
+        console.trace();
+        console.groupEnd();
+      }
       api.post('/auth/logout');
     } catch (e) {
       // ignore network error; still clear local state
@@ -54,15 +60,40 @@ class AuthService {
 
   // Get current user
   async getCurrentUser() {
+    // Avoid sending duplicate /auth/me requests when multiple components mount at once
+    if (this._getCurrentUserPromise) {
+      return this._getCurrentUserPromise;
+    }
+
     // Ensure Authorization header is set from localStorage token (fallback for dev)
     const token = localStorage.getItem('token');
     if (token && !api.defaults.headers.common['Authorization']) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await api.get('/auth/me');
-    // response.data is envelope { status, data: { user } }
-    return response?.data?.data?.user || null;
+    // Use suppressToast so a normal 'not authenticated' response does not show an error toast
+    const config = { suppressToast: true };
+
+    this._getCurrentUserPromise = (async () => {
+      try {
+        const response = await api.get('/auth/me', config);
+        // response.data is envelope { status, data: { user } }
+        const user = response?.data?.data?.user || null;
+        return user;
+      } catch (err) {
+        // If 401/unauthenticated, return null silently
+        if (err.response && err.response.status === 401) {
+          return null;
+        }
+        // For other errors, rethrow so callers can handle network/server issues
+        throw err;
+      } finally {
+        // Clear the in-flight promise so subsequent calls can re-check later
+        this._getCurrentUserPromise = null;
+      }
+    })();
+
+    return this._getCurrentUserPromise;
   }
 
   // Verify email
