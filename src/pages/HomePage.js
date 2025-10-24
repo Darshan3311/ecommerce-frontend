@@ -72,6 +72,15 @@ const HomePage = () => {
     }
   };
 
+  // Helper to compute a safe image src from possible shapes (string, object with url, or object with src/path)
+  const safeImageSrc = (img) => {
+    if (!img) return null;
+    if (typeof img === 'string') return img;
+    if (typeof img === 'object' && img.url) return img.url;
+    if (typeof img === 'object' && (img.src || img.path)) return img.src || img.path;
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -188,9 +197,9 @@ const HomePage = () => {
                   
                   <Link to={`/products/${product._id}`}>
                     <div className="aspect-w-1 aspect-h-1 bg-gray-200 relative h-64">
-                      {product.images && product.images.length > 0 ? (
+                      {product.images && product.images.length > 0 && safeImageSrc(product.images[0]) ? (
                         <img
-                          src={product.images[0]}
+                          src={safeImageSrc(product.images[0])}
                           alt={product.name}
                           className="w-full h-full object-cover"
                         />
