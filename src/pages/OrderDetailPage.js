@@ -47,7 +47,7 @@ const OrderDetailPage = () => {
           <strong>Status:</strong> {order.orderStatus}
         </div>
         <div className="mb-4">
-          <strong>Total:</strong> ${order.pricing.total.toFixed(2)}
+          <strong>Total:</strong> ₹{order.pricing.total.toFixed(2)}
         </div>
         <div className="mb-4">
           <strong>Shipping Address:</strong>
@@ -66,7 +66,7 @@ const OrderDetailPage = () => {
                   <div className="font-medium">{item.productName}</div>
                   <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
                 </div>
-                <div>${(item.priceAtPurchase * item.quantity).toFixed(2)}</div>
+                <div>₹{(item.priceAtPurchase * item.quantity).toFixed(2)}</div>
               </li>
             ))}
           </ul>

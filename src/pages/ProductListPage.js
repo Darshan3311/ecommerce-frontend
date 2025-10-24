@@ -286,12 +286,12 @@ const ProductListPage = () => {
                       {/* Price */}
                       <div className="flex items-baseline gap-2 mb-3">
                         <span className="text-2xl font-bold text-gray-900">
-                          ${displayPrice(product).toFixed(2)}
+                          ₹{displayPrice(product).toFixed(2)}
                         </span>
                         {product.compareAtPrice && product.compareAtPrice > product.price && (
                           <>
                             <span className="text-sm text-gray-500 line-through">
-                              ${product.compareAtPrice.toFixed(2)}
+                              ₹{product.compareAtPrice.toFixed(2)}
                             </span>
                             <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">
                               {Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)}% OFF

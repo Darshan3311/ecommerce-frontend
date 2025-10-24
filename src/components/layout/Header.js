@@ -50,7 +50,7 @@ const Header = () => {
       {/* Top Bar */}
       <div className="bg-secondary-800 text-white py-2">
         <div className="container-custom flex justify-between items-center text-sm">
-          <p>Free shipping on orders over $50</p>
+          <p>Free shipping on orders over ₹50</p>
           <div className="flex gap-4">
             <Link to="/about" className="hover:text-accent-400">About</Link>
             <Link to="/contact" className="hover:text-accent-400">Contact</Link>

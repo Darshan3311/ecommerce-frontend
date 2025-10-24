@@ -141,7 +141,7 @@ const SellerDashboard = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
               <p className="text-2xl font-bold text-gray-900">
-                ${stats?.totalRevenue?.toFixed(2) || '0.00'}
+                ₹{stats?.totalRevenue?.toFixed(2) || '0.00'}
               </p>
             </div>
             <CurrencyDollarIcon className="h-12 w-12 text-yellow-600" />
@@ -234,7 +234,7 @@ const SellerDashboard = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${product.price}
+                      ₹{product.price}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.stock}
@@ -347,7 +347,7 @@ const SellerDashboard = () => {
                       {order.user ? `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() : '—'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${order.pricing?.total?.toFixed ? order.pricing.total.toFixed(2) : (order.pricing?.total || '0.00')}
+                      ₹{order.pricing?.total?.toFixed ? order.pricing.total.toFixed(2) : (order.pricing?.total || '0.00')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">

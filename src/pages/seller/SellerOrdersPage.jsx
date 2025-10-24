@@ -78,7 +78,7 @@ const SellerOrdersPage = () => {
                     <tr key={order._id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order.orderNumber}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.user ? `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() : '—'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${order.pricing?.total?.toFixed ? order.pricing.total.toFixed(2) : (order.pricing?.total || '0.00')}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{order.pricing?.total?.toFixed ? order.pricing.total.toFixed(2) : (order.pricing?.total || '0.00')}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">{order.orderStatus}</span>
                       </td>

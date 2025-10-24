@@ -156,7 +156,7 @@ const CartPage = () => {
                           </p>
                         )}
                         <p className="text-2xl font-bold text-indigo-600">
-                          ${item.price.toFixed(2)}
+                          ₹{item.price.toFixed(2)}
                         </p>
                       </div>
 
@@ -202,7 +202,7 @@ const CartPage = () => {
                     {/* Subtotal */}
                     <div className="mt-4">
                       <p className="text-sm text-gray-600">
-                        Subtotal: <span className="font-semibold text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
+                        Subtotal: <span className="font-semibold text-gray-900">₹{(item.price * item.quantity).toFixed(2)}</span>
                       </p>
                     </div>
                   </div>
@@ -219,18 +219,18 @@ const CartPage = () => {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal ({items.length} item{items.length !== 1 ? 's' : ''})</span>
-                  <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                  <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between text-gray-600">
                   <span>Tax (8%)</span>
-                  <span className="font-semibold">${tax.toFixed(2)}</span>
+                  <span className="font-semibold">₹{tax.toFixed(2)}</span>
                 </div>
 
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-xl font-bold text-gray-900">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>₹{total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

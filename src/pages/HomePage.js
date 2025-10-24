@@ -101,7 +101,7 @@ const HomePage = () => {
                 <TruckIcon className="w-12 h-12 text-indigo-600" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Free Shipping</h3>
-              <p className="text-gray-600">Free shipping on orders over $50</p>
+              <p className="text-gray-600">Free shipping on orders over ₹50</p>
             </div>
             <div className="text-center">
               <div className="flex justify-center mb-4">
@@ -224,11 +224,11 @@ const HomePage = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-2xl font-bold text-indigo-600">
-                          ${product.price?.toFixed(2)}
+                          ₹{product.price?.toFixed(2)}
                         </span>
                         {product.compareAtPrice && (
                           <span className="ml-2 text-sm text-gray-500 line-through">
-                            ${product.compareAtPrice.toFixed(2)}
+                            ₹{product.compareAtPrice.toFixed(2)}
                           </span>
                         )}
                       </div>

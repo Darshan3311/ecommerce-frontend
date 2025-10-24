@@ -158,10 +158,10 @@ const ProductsListPage = () => {
                             </p>
                           </div>
                         </div>
-                        <div className="mt-2 flex items-center justify-between">
+                            <div className="mt-2 flex items-center justify-between">
                           <div className="flex items-center space-x-4 text-sm text-gray-500">
                             <span className="font-semibold text-gray-900">
-                              ${product.price}
+                              ₹{product.price}
                             </span>
                             <span>Stock: {product.stock}</span>
                             <span>SKU: {product.sku}</span>

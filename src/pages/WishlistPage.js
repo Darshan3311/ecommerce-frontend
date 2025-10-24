@@ -150,7 +150,7 @@ const WishlistPage = () => {
 
                     <div className="mb-3">
                       <span className="text-2xl font-bold text-gray-900">
-                        ${product.price?.toFixed(2)}
+                        ₹{product.price?.toFixed(2)}
                       </span>
                     </div>
 

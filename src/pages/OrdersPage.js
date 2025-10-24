@@ -43,7 +43,7 @@ const OrdersPage = () => {
             <div className="flex justify-between items-center">
               <div>
                 <div className="text-sm text-gray-500">Order: {order.orderNumber}</div>
-                <div className="text-lg font-semibold">${(order.pricing?.total ?? 0).toFixed(2)}</div>
+                <div className="text-lg font-semibold">₹{(order.pricing?.total ?? 0).toFixed(2)}</div>
                 <div className="text-sm text-gray-600">Status: {order.orderStatus}</div>
               </div>
               <div>

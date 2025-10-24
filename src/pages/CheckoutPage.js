@@ -101,9 +101,9 @@ const CheckoutPage = () => {
         <div className="mb-6 p-4 bg-gray-50 rounded">
           <h2 className="text-lg font-semibold mb-2">Order Summary</h2>
           <p className="text-gray-600">Items: {items.length}</p>
-          <p className="text-gray-600">Subtotal: ${subtotal.toFixed(2)}</p>
-          <p className="text-gray-600">Tax (8%): ${tax.toFixed(2)}</p>
-          <p className="text-lg font-bold mt-2">Total: ${total.toFixed(2)}</p>
+          <p className="text-gray-600">Subtotal: ₹{subtotal.toFixed(2)}</p>
+          <p className="text-gray-600">Tax (8%): ₹{tax.toFixed(2)}</p>
+          <p className="text-lg font-bold mt-2">Total: ₹{total.toFixed(2)}</p>
         </div>
 
         <Formik

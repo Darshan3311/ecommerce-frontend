@@ -79,11 +79,11 @@ const ProductCard = ({ product }) => {
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-3">
           <span className="text-xl font-bold text-gray-900">
-            ${cheapestVariant?.price || 0}
+            ₹{cheapestVariant?.price || 0}
           </span>
           {cheapestVariant?.compareAtPrice && (
             <span className="text-sm text-gray-500 line-through">
-              ${cheapestVariant.compareAtPrice}
+              ₹{cheapestVariant.compareAtPrice}
             </span>
           )}
           {cheapestVariant?.getDiscountPercentage && cheapestVariant.getDiscountPercentage() > 0 && (
